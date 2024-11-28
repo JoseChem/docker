@@ -1,15 +1,34 @@
-# Usa una imagen base de PHP con Apache
-FROM php:7.4-apache
+version: '3.8'
 
-# Instala las extensiones de PHP necesarias para PDO y MySQL
-RUN docker-php-ext-install pdo pdo_mysql
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mi-aplicacion
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www/html
+    environment:
+      DB_HOST: localhost
+      DB_NAME: hacer4
+      DB_USER: root
+      DB_PASSWORD: ""
+    depends_on:
+      - db
 
-# Copia tu código PHP al contenedor
-COPY ./web /var/www/html
+  db:
+    image: mysql:5.7
+    container_name: mysql-database
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ""
+      MYSQL_DATABASE: hacer4
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
 
-# Establece los permisos correctos para los archivos
-RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html
-
-# Expone el puerto 80 para Apach
-EXPOSE 80
+volumes:
+  db_data:
